@@ -6,9 +6,17 @@ import AdminMediaUpload from '@/components/admin/AdminMediaUpload';
 interface Course {
   _id: string;
   title: string;
+  slug: string;
   thumbnail: string;
+  bannerImage: string;
   price: number;
   link: string;
+  instructor: string;
+  category: string;
+  introVideoUrl: string;
+  enrollmentStatus: string;
+  curriculum: string[];
+  lessons: string[];
   techStack: string[];
   description: string;
   duration: string;
@@ -23,7 +31,9 @@ export default function CoursesManager() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Course | null>(null);
   const [form, setForm] = useState({
-    title: '', thumbnail: '', price: 0, link: '',
+    title: '', slug: '', thumbnail: '', bannerImage: '', price: 0, link: '',
+    instructor: 'Framo', category: 'Development', introVideoUrl: '',
+    enrollmentStatus: 'open', curriculum: '', lessons: '',
     techStack: '', description: '', duration: '',
     level: 'Beginner', published: false, tags: '',
   });
@@ -47,6 +57,8 @@ export default function CoursesManager() {
       ...form,
       techStack: form.techStack.split(',').map(t => t.trim()).filter(Boolean),
       tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+      curriculum: form.curriculum.split('\n').map(t => t.trim()).filter(Boolean),
+      lessons: form.lessons.split('\n').map(t => t.trim()).filter(Boolean),
     };
     const method = editing ? 'PUT' : 'POST';
     const url = editing ? `/api/courses/${editing._id}` : '/api/courses';
@@ -70,8 +82,15 @@ export default function CoursesManager() {
   const handleEdit = (course: Course) => {
     setEditing(course);
     setForm({
-      title: course.title, thumbnail: course.thumbnail,
+      title: course.title, slug: course.slug || '', thumbnail: course.thumbnail,
+      bannerImage: course.bannerImage || '',
       price: course.price, link: course.link,
+      instructor: course.instructor || 'Framo',
+      category: course.category || 'Development',
+      introVideoUrl: course.introVideoUrl || '',
+      enrollmentStatus: course.enrollmentStatus || 'open',
+      curriculum: (course.curriculum || []).join('\n'),
+      lessons: (course.lessons || []).join('\n'),
       techStack: course.techStack.join(', '),
       description: course.description, duration: course.duration,
       level: course.level, published: course.published,
@@ -81,10 +100,15 @@ export default function CoursesManager() {
   };
 
   const resetForm = () => setForm({
-    title: '', thumbnail: '', price: 0, link: '',
+    title: '', slug: '', thumbnail: '', bannerImage: '', price: 0, link: '',
+    instructor: 'Framo', category: 'Development', introVideoUrl: '',
+    enrollmentStatus: 'open', curriculum: '', lessons: '',
     techStack: '', description: '', duration: '',
     level: 'Beginner', published: false, tags: '',
   });
+
+  const autoSlug = (title: string) =>
+    title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   const inputStyle = {
     width: '100%', padding: '10px 14px',
@@ -139,7 +163,12 @@ export default function CoursesManager() {
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={labelStyle}>Title *</label>
-                <input style={inputStyle} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required />
+                <input style={inputStyle} value={form.title} onChange={e => setForm({ ...form, title: e.target.value, slug: form.slug || autoSlug(e.target.value) })} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Slug</label>
+                <input style={inputStyle} value={form.slug} placeholder="course-url-slug"
+                  onChange={e => setForm({ ...form, slug: e.target.value })} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
@@ -156,10 +185,49 @@ export default function CoursesManager() {
                   </div>
                 </div>
                 <div>
-                  <label style={labelStyle}>Course Link *</label>
+                  <label style={labelStyle}>Enrollment Link</label>
                   <input style={inputStyle} value={form.link} placeholder="https://..."
-                    onChange={e => setForm({ ...form, link: e.target.value })} required />
+                    onChange={e => setForm({ ...form, link: e.target.value })} />
                 </div>
+              </div>
+              <div>
+                <label style={labelStyle}>Banner Image URL</label>
+                <input style={inputStyle} value={form.bannerImage} placeholder="https://..."
+                  onChange={e => setForm({ ...form, bannerImage: e.target.value })} />
+                <div style={{ marginTop: '0.6rem' }}>
+                  <AdminMediaUpload
+                    label="Upload Banner"
+                    namespace="courses"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onUploaded={url => setForm(current => ({ ...current, bannerImage: url }))}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={labelStyle}>Instructor</label>
+                  <input style={inputStyle} value={form.instructor}
+                    onChange={e => setForm({ ...form, instructor: e.target.value })} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Category</label>
+                  <input style={inputStyle} value={form.category}
+                    onChange={e => setForm({ ...form, category: e.target.value })} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Enrollment</label>
+                  <select style={inputStyle} value={form.enrollmentStatus}
+                    onChange={e => setForm({ ...form, enrollmentStatus: e.target.value })}>
+                    <option value="open">Open</option>
+                    <option value="waitlist">Waitlist</option>
+                    <option value="closed">Closed</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style={labelStyle}>Intro Video URL</label>
+                <input style={inputStyle} value={form.introVideoUrl} placeholder="YouTube, Vimeo, or MP4 URL"
+                  onChange={e => setForm({ ...form, introVideoUrl: e.target.value })} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                 <div>
@@ -183,6 +251,20 @@ export default function CoursesManager() {
                 <label style={labelStyle}>Description</label>
                 <textarea style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }}
                   value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={labelStyle}>Curriculum Modules (one per line)</label>
+                  <textarea style={{ ...inputStyle, minHeight: '110px', resize: 'vertical' }}
+                    value={form.curriculum}
+                    onChange={e => setForm({ ...form, curriculum: e.target.value })} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Lessons (one per line)</label>
+                  <textarea style={{ ...inputStyle, minHeight: '110px', resize: 'vertical' }}
+                    value={form.lessons}
+                    onChange={e => setForm({ ...form, lessons: e.target.value })} />
+                </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>

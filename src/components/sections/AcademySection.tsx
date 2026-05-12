@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import VideoPlayer from '@/components/shared/VideoPlayer';
 import { resolveVideoThumbnail } from '@/lib/video';
 
 interface Course {
   _id: string;
   title: string;
+  slug: string;
   thumbnail: string;
   price: number;
   level: string;
@@ -59,6 +61,7 @@ export default function AcademySection() {
   const [loadingVideos, setLoadingVideos] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetch('/api/courses')
@@ -93,8 +96,7 @@ export default function AcademySection() {
   }, [courses, videos, activeTab]);
 
   const openCourse = (course: Course) => {
-    if (!course.link) return;
-    window.open(course.link, '_blank', 'noopener,noreferrer');
+    router.push(`/academy/${course.slug || course._id}`);
   };
 
   return (
@@ -168,13 +170,13 @@ export default function AcademySection() {
                 <div key={course._id} className="scroll-fade" style={{
                   background: 'var(--bg2)', border: '1px solid var(--border)',
                   borderRadius: '12px', overflow: 'hidden', transition: 'all 0.3s ease',
-                  cursor: course.link ? 'pointer' : 'default',
+                  cursor: 'pointer',
                 }}
-                  role={course.link ? 'link' : undefined}
-                  tabIndex={course.link ? 0 : undefined}
+                  role="link"
+                  tabIndex={0}
                   onClick={() => openCourse(course)}
                   onKeyDown={e => {
-                    if ((e.key === 'Enter' || e.key === ' ') && course.link) {
+                    if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
                       openCourse(course);
                     }
@@ -258,7 +260,7 @@ export default function AcademySection() {
                       <span style={{ fontFamily: 'var(--mono)', fontSize: '0.65rem', color: 'var(--text3)' }}>
                         {course.duration}
                       </span>
-                      <a href={course.link} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{
+                      <a href={`/academy/${course.slug || course._id}`} onClick={e => e.stopPropagation()} style={{
                         fontFamily: 'var(--mono)', fontSize: '0.72rem',
                         color: 'var(--green)', textDecoration: 'none',
                         fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',

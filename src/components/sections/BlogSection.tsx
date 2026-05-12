@@ -325,6 +325,22 @@ export default function BlogSection() {
               }}>
                 {selectedPost.body || 'Article content is not available yet.'}
               </div>
+              <a
+                href={`/blog/${selectedPost.slug}`}
+                style={{
+                  display: 'inline-flex',
+                  marginTop: '1.5rem',
+                  fontFamily: 'var(--mono)',
+                  fontSize: '0.72rem',
+                  color: 'var(--green)',
+                  textDecoration: 'none',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Open article page →
+              </a>
             </div>
           </article>
         </div>
