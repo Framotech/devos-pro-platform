@@ -289,7 +289,7 @@ export default function AboutSection() {
             }}>
               Work With Me
             </a>
-            <a href="#" style={{
+            <a href="/resume" style={{
               flex: 1,
               padding: '13px',
               background: 'transparent',

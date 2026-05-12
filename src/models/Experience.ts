@@ -7,6 +7,7 @@ export interface IExperience extends Document {
   startDate: string;
   endDate: string;
   highlights: string[];
+  technologies: string[];
   current: boolean;
   order: number;
 }
@@ -19,6 +20,7 @@ const ExperienceSchema = new Schema<IExperience>(
     startDate: { type: String, required: true },
     endDate: { type: String, default: 'Present' },
     highlights: { type: [String], default: [] },
+    technologies: { type: [String], default: [] },
     current: { type: Boolean, default: false },
     order: { type: Number, default: 0 },
   },

@@ -22,6 +22,7 @@ export default function Navbar() {
     { label: 'Studio', href: '/studio' },
     { label: 'Academy', href: '/academy' },
     { label: 'Blog', href: '/blog' },
+    { label: 'Resume', href: '/resume' },
   ];
 
   return (

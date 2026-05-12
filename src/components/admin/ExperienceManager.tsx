@@ -10,6 +10,7 @@ interface Experience {
   startDate: string;
   endDate: string;
   highlights: string[];
+  technologies: string[];
   current: boolean;
   order: number;
 }
@@ -22,7 +23,7 @@ export default function ExperienceManager() {
   const [form, setForm] = useState({
     role: '', company: '', location: '',
     startDate: '', endDate: 'Present',
-    highlights: '', current: false, order: 0,
+    highlights: '', technologies: '', current: false, order: 0,
   });
 
   const fetchItems = useCallback( async () => {
@@ -43,6 +44,7 @@ export default function ExperienceManager() {
     const payload = {
       ...form,
       highlights: form.highlights.split('\n').filter(Boolean),
+      technologies: form.technologies.split(',').map(t => t.trim()).filter(Boolean),
     };
     const method = editing ? 'PUT' : 'POST';
     const url = editing ? `/api/experience/${editing._id}` : '/api/experience';
@@ -69,6 +71,7 @@ export default function ExperienceManager() {
       role: item.role, company: item.company,
       location: item.location, startDate: item.startDate,
       endDate: item.endDate, highlights: item.highlights.join('\n'),
+      technologies: (item.technologies || []).join(', '),
       current: item.current, order: item.order,
     });
     setShowForm(true);
@@ -77,7 +80,7 @@ export default function ExperienceManager() {
   const resetForm = () => setForm({
     role: '', company: '', location: '',
     startDate: '', endDate: 'Present',
-    highlights: '', current: false, order: 0,
+    highlights: '', technologies: '', current: false, order: 0,
   });
 
   const inputStyle = {
@@ -160,6 +163,11 @@ export default function ExperienceManager() {
                   value={form.highlights}
                   onChange={e => setForm({ ...form, highlights: e.target.value })} />
               </div>
+              <div>
+                <label style={labelStyle}>Technologies (comma separated)</label>
+                <input style={inputStyle} value={form.technologies} placeholder="Next.js, Docker, MongoDB"
+                  onChange={e => setForm({ ...form, technologies: e.target.value })} />
+              </div>
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <button type="submit" style={{ flex: 1, padding: '12px', background: 'var(--green)', color: '#000', fontWeight: 700, borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'var(--sans)' }}>
                   {editing ? 'Update' : 'Add Experience'}
@@ -215,6 +223,20 @@ export default function ExperienceManager() {
                         <li key={i} style={{ fontSize: '0.82rem', color: 'var(--text2)', marginBottom: '2px' }}>{h}</li>
                       ))}
                     </ul>
+                  )}
+                  {item.technologies?.length > 0 && (
+                    <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
+                      {item.technologies.map(tech => (
+                        <span key={tech} style={{
+                          fontFamily: 'var(--mono)', fontSize: '0.6rem',
+                          padding: '3px 8px', background: 'var(--bg3)',
+                          border: '1px solid var(--border)', borderRadius: '4px',
+                          color: 'var(--text2)', textTransform: 'uppercase',
+                        }}>
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', marginLeft: '1rem' }}>

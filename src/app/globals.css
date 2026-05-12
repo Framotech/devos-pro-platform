@@ -485,6 +485,10 @@ body {
 }
 
 @media (max-width: 900px) {
+  #skills {
+    grid-template-columns: 1fr !important;
+  }
+
   .site-nav {
     height: 64px !important;
     padding: 0 1rem !important;
@@ -710,5 +714,54 @@ body {
 
   .admin-stats-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .resume-header,
+  .resume-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .resume-page {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .resume-sheet {
+    padding: 1.25rem !important;
+  }
+}
+
+@media print {
+  .site-nav,
+  footer,
+  .no-print,
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .public-main,
+  .resume-page {
+    padding: 0 !important;
+  }
+
+  .resume-sheet {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    padding: 0 !important;
+  }
+
+  .resume-sheet * {
+    color: #111 !important;
+    box-shadow: none !important;
   }
 }
