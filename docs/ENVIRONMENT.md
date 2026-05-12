@@ -10,16 +10,21 @@ Use `.env.example` as the public template for required variables. Real values be
 - Clerk variables: used by `@clerk/nextjs` provider and middleware for admin authentication.
 - `RESEND_API_KEY`: reserved for email flows such as contact notifications.
 - `NEXT_PUBLIC_APP_URL`: used by deployment and future absolute URL generation.
-- Media variables: define the local-first upload abstraction for the planned media system without forcing a storage provider.
+- Cloudinary variables: used by the protected upload endpoint for persistent production media.
 
-## Local Media Uploads
+## Cloud Media Uploads
 
 The protected upload endpoint is `POST /api/media/upload`. It accepts multipart form data with:
 
 - `file`: image or MP4 file.
 - `namespace`: logical storage folder such as `projects`, `studio`, `blog`, `courses`, or `videos`.
 
-Local uploads are written under `MEDIA_UPLOAD_DIR` and served from `NEXT_PUBLIC_MEDIA_BASE_URL`. Generated media under `public/uploads` is ignored by Git.
+Uploads are stored in Cloudinary under `devos-pro-platform/<namespace>`. The returned permanent `secure_url` is stored by admin forms and rendered by the frontend.
+
+Required Cloudinary configuration:
+
+- `CLOUDINARY_CLOUD_NAME`
+- Either `CLOUDINARY_UPLOAD_PRESET` for unsigned uploads, or both `CLOUDINARY_API_KEY` and `CLOUDINARY_API_SECRET` for signed server uploads.
 
 ## GitHub Secrets Required
 
@@ -27,6 +32,9 @@ Local uploads are written under `MEDIA_UPLOAD_DIR` and served from `NEXT_PUBLIC_
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
 - `RESEND_API_KEY`
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
 - `NEXT_PUBLIC_APP_URL`
 - `NEXT_PUBLIC_STAGING_APP_URL`
 - `NEXT_PUBLIC_PRODUCTION_APP_URL`
@@ -36,6 +44,4 @@ Local uploads are written under `MEDIA_UPLOAD_DIR` and served from `NEXT_PUBLIC_
 
 ## GitHub Variables Optional
 
-- `MEDIA_STORAGE_DRIVER`
-- `MEDIA_UPLOAD_DIR`
-- `NEXT_PUBLIC_MEDIA_BASE_URL`
+- `CLOUDINARY_UPLOAD_PRESET`

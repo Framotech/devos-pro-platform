@@ -1,6 +1,12 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const isAdminRoute = createRouteMatcher(['/admin(.*)']);
+const isApiRoute = createRouteMatcher(['/api(.*)']);
+const isPublicApiWriteRoute = createRouteMatcher([
+  '/api/contact(.*)',
+  '/api/testimonials',
+  '/api/lab(.*)',
+]);
 const isPublicRoute = createRouteMatcher([
   '/',
   '/projects(.*)',
@@ -14,6 +20,11 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  if (isApiRoute(req) && req.method !== 'GET' && !isPublicApiWriteRoute(req)) {
+    await auth.protect();
+    return;
+  }
+
   if (!isPublicRoute(req) && isAdminRoute(req)) {
     await auth.protect();
   }
