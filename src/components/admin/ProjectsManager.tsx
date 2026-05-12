@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import AdminMediaUpload from '@/components/admin/AdminMediaUpload';
 
 interface Project {
   _id: string;
@@ -177,6 +178,14 @@ export default function ProjectsManager() {
                 <label style={labelStyle}>Image URL</label>
                 <input style={inputStyle} value={form.image} placeholder="https://..."
                   onChange={e => setForm({ ...form, image: e.target.value })} />
+                <div style={{ marginTop: '0.6rem' }}>
+                  <AdminMediaUpload
+                    label="Upload Project Image"
+                    namespace="projects"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onUploaded={url => setForm(current => ({ ...current, image: url }))}
+                  />
+                </div>
               </div>
 
               <div>

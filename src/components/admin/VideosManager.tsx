@@ -1,11 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import AdminMediaUpload from '@/components/admin/AdminMediaUpload';
+import { resolveVideoThumbnail } from '@/lib/video';
 
 interface Video {
   _id: string;
   title: string;
   youtubeId: string;
+  sourceUrl: string;
+  thumbnailUrl: string;
   category: string;
   description: string;
   duration: string;
@@ -20,7 +24,7 @@ export default function VideosManager() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Video | null>(null);
   const [form, setForm] = useState({
-    title: '', youtubeId: '', category: 'Tutorial',
+    title: '', youtubeId: '', sourceUrl: '', thumbnailUrl: '', category: 'Tutorial',
     description: '', duration: '', isFeatured: false, published: false,
   });
 
@@ -64,6 +68,8 @@ export default function VideosManager() {
     setEditing(video);
     setForm({
       title: video.title, youtubeId: video.youtubeId,
+      sourceUrl: video.sourceUrl || video.youtubeId,
+      thumbnailUrl: video.thumbnailUrl || '',
       category: video.category, description: video.description,
       duration: video.duration, isFeatured: video.isFeatured,
       published: video.published,
@@ -72,7 +78,7 @@ export default function VideosManager() {
   };
 
   const resetForm = () => setForm({
-    title: '', youtubeId: '', category: 'Tutorial',
+    title: '', youtubeId: '', sourceUrl: '', thumbnailUrl: '', category: 'Tutorial',
     description: '', duration: '', isFeatured: false, published: false,
   });
 
@@ -127,9 +133,9 @@ export default function VideosManager() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label style={labelStyle}>YouTube ID *</label>
-                  <input style={inputStyle} value={form.youtubeId} placeholder="dQw4w9WgXcQ"
-                    onChange={e => setForm({ ...form, youtubeId: e.target.value })} required />
+                  <label style={labelStyle}>Video Source *</label>
+                  <input style={inputStyle} value={form.sourceUrl} placeholder="YouTube, Vimeo, /uploads/video.mp4"
+                    onChange={e => setForm({ ...form, sourceUrl: e.target.value, youtubeId: e.target.value })} required />
                 </div>
                 <div>
                   <label style={labelStyle}>Duration</label>
@@ -144,17 +150,36 @@ export default function VideosManager() {
                 </select>
               </div>
               <div>
+                <label style={labelStyle}>Thumbnail URL</label>
+                <input style={inputStyle} value={form.thumbnailUrl} placeholder="Auto-generated for YouTube or local upload URL"
+                  onChange={e => setForm({ ...form, thumbnailUrl: e.target.value })} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <AdminMediaUpload
+                  label="Upload MP4"
+                  namespace="videos"
+                  accept="video/mp4"
+                  onUploaded={url => setForm(current => ({ ...current, sourceUrl: url }))}
+                />
+                <AdminMediaUpload
+                  label="Upload Thumbnail"
+                  namespace="videos"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  onUploaded={url => setForm(current => ({ ...current, thumbnailUrl: url }))}
+                />
+              </div>
+              <div>
                 <label style={labelStyle}>Description</label>
                 <textarea style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }}
                   value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
               </div>
 
               {/* Preview */}
-              {form.youtubeId && (
+              {(form.sourceUrl || form.thumbnailUrl) && (
                 <div>
                   <label style={labelStyle}>Thumbnail Preview</label>
                   <img
-                    src={`https://img.youtube.com/vi/${form.youtubeId}/mqdefault.jpg`}
+                    src={resolveVideoThumbnail(form.sourceUrl, form.youtubeId, form.thumbnailUrl) || '/favicon.ico'}
                     alt="thumbnail"
                     style={{ width: '100%', borderRadius: '8px', border: '1px solid var(--border)' }}
                   />
@@ -202,7 +227,7 @@ export default function VideosManager() {
             >
               <div style={{ position: 'relative' }}>
                 <img
-                  src={`https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg`}
+                  src={resolveVideoThumbnail(video.sourceUrl, video.youtubeId, video.thumbnailUrl) || '/favicon.ico'}
                   alt={video.title}
                   style={{ width: '100%', display: 'block', opacity: 0.8 }}
                 />

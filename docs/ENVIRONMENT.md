@@ -12,6 +12,15 @@ Use `.env.example` as the public template for required variables. Real values be
 - `NEXT_PUBLIC_APP_URL`: used by deployment and future absolute URL generation.
 - Media variables: define the local-first upload abstraction for the planned media system without forcing a storage provider.
 
+## Local Media Uploads
+
+The protected upload endpoint is `POST /api/media/upload`. It accepts multipart form data with:
+
+- `file`: image or MP4 file.
+- `namespace`: logical storage folder such as `projects`, `studio`, `blog`, `courses`, or `videos`.
+
+Local uploads are written under `MEDIA_UPLOAD_DIR` and served from `NEXT_PUBLIC_MEDIA_BASE_URL`. Generated media under `public/uploads` is ignored by Git.
+
 ## GitHub Secrets Required
 
 - `MONGODB_URI`

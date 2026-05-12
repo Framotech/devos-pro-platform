@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import AdminMediaUpload from '@/components/admin/AdminMediaUpload';
 
 interface Course {
   _id: string;
@@ -145,6 +146,14 @@ export default function CoursesManager() {
                   <label style={labelStyle}>Thumbnail URL</label>
                   <input style={inputStyle} value={form.thumbnail} placeholder="https://..."
                     onChange={e => setForm({ ...form, thumbnail: e.target.value })} />
+                  <div style={{ marginTop: '0.6rem' }}>
+                    <AdminMediaUpload
+                      label="Upload Thumbnail"
+                      namespace="courses"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      onUploaded={url => setForm(current => ({ ...current, thumbnail: url }))}
+                    />
+                  </div>
                 </div>
                 <div>
                   <label style={labelStyle}>Course Link *</label>

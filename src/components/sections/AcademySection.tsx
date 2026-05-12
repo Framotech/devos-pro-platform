@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import VideoPlayer from '@/components/shared/VideoPlayer';
+import { resolveVideoThumbnail } from '@/lib/video';
 
 interface Course {
   _id: string;
@@ -19,6 +21,8 @@ interface Video {
   _id: string;
   title: string;
   youtubeId: string;
+  sourceUrl: string;
+  thumbnailUrl: string;
   category: string;
   duration: string;
   description: string;
@@ -53,6 +57,7 @@ export default function AcademySection() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [loadingVideos, setLoadingVideos] = useState(true);
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -86,6 +91,11 @@ export default function AcademySection() {
     if (sectionRef.current) obs.observe(sectionRef.current);
     return () => obs.disconnect();
   }, [courses, videos, activeTab]);
+
+  const openCourse = (course: Course) => {
+    if (!course.link) return;
+    window.open(course.link, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <section ref={sectionRef} style={{
@@ -158,7 +168,17 @@ export default function AcademySection() {
                 <div key={course._id} className="scroll-fade" style={{
                   background: 'var(--bg2)', border: '1px solid var(--border)',
                   borderRadius: '12px', overflow: 'hidden', transition: 'all 0.3s ease',
+                  cursor: course.link ? 'pointer' : 'default',
                 }}
+                  role={course.link ? 'link' : undefined}
+                  tabIndex={course.link ? 0 : undefined}
+                  onClick={() => openCourse(course)}
+                  onKeyDown={e => {
+                    if ((e.key === 'Enter' || e.key === ' ') && course.link) {
+                      e.preventDefault();
+                      openCourse(course);
+                    }
+                  }}
                   onMouseEnter={e => {
                     const el = e.currentTarget as HTMLDivElement;
                     el.style.borderColor = 'var(--border-green)';
@@ -238,7 +258,7 @@ export default function AcademySection() {
                       <span style={{ fontFamily: 'var(--mono)', fontSize: '0.65rem', color: 'var(--text3)' }}>
                         {course.duration}
                       </span>
-                      <a href={course.link} target="_blank" rel="noreferrer" style={{
+                      <a href={course.link} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{
                         fontFamily: 'var(--mono)', fontSize: '0.72rem',
                         color: 'var(--green)', textDecoration: 'none',
                         fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
@@ -276,7 +296,17 @@ export default function AcademySection() {
                 <div key={video._id} className="scroll-fade" style={{
                   background: 'var(--bg2)', border: '1px solid var(--border)',
                   borderRadius: '12px', overflow: 'hidden', transition: 'all 0.3s ease',
+                  cursor: 'pointer',
                 }}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedVideo(video)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedVideo(video);
+                    }
+                  }}
                   onMouseEnter={e => {
                     const el = e.currentTarget as HTMLDivElement;
                     el.style.borderColor = 'var(--border-green)';
@@ -292,7 +322,7 @@ export default function AcademySection() {
                 >
                   <div style={{ position: 'relative', overflow: 'hidden' }}>
                     <img
-                      src={`https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg`}
+                      src={resolveVideoThumbnail(video.sourceUrl, video.youtubeId, video.thumbnailUrl) || '/favicon.ico'}
                       alt={video.title}
                       style={{ width: '100%', display: 'block', opacity: 0.85, transition: 'opacity 0.3s' }}
                       onMouseEnter={e => (e.currentTarget as HTMLImageElement).style.opacity = '1'}
@@ -341,23 +371,86 @@ export default function AcademySection() {
                         {video.description.slice(0, 80)}...
                       </p>
                     )}
-                    <a
-                      href={`https://youtube.com/watch?v=${video.youtubeId}`}
-                      target="_blank" rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation();
+                        setSelectedVideo(video);
+                      }}
                       style={{
+                        background: 'transparent', border: 'none', padding: 0, cursor: 'pointer',
                         fontFamily: 'var(--mono)', fontSize: '0.72rem',
                         color: 'var(--green)', textDecoration: 'none',
                         fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
                       }}
                     >
                       Watch Now →
-                    </a>
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           )}
         </>
+      )}
+
+      {selectedVideo && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 400,
+          background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '1.25rem',
+        }} onClick={() => setSelectedVideo(null)}>
+          <div style={{
+            width: 'min(960px, 100%)',
+            background: 'var(--bg2)',
+            border: '1px solid var(--border)',
+            borderRadius: '14px',
+            overflow: 'hidden',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.55)',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              gap: '1rem', padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)',
+            }}>
+              <div>
+                <div style={{
+                  fontFamily: 'var(--mono)', fontSize: '0.62rem',
+                  color: 'var(--blue)', textTransform: 'uppercase',
+                  letterSpacing: '0.1em', marginBottom: '0.35rem',
+                }}>
+                  {selectedVideo.category} {selectedVideo.duration ? `· ${selectedVideo.duration}` : ''}
+                </div>
+                <h2 style={{ fontSize: '1rem', fontWeight: 700, lineHeight: 1.35 }}>
+                  {selectedVideo.title}
+                </h2>
+              </div>
+              <button onClick={() => setSelectedVideo(null)} style={{
+                flex: '0 0 auto',
+                width: '38px', height: '38px',
+                background: 'var(--bg3)', border: '1px solid var(--border)',
+                borderRadius: '8px', color: 'var(--text2)',
+                cursor: 'pointer', fontSize: '1.1rem',
+              }}>✕</button>
+            </div>
+            <VideoPlayer
+              title={selectedVideo.title}
+              sourceUrl={selectedVideo.sourceUrl}
+              youtubeId={selectedVideo.youtubeId}
+              thumbnailUrl={selectedVideo.thumbnailUrl}
+            />
+            {selectedVideo.description && (
+              <p style={{
+                padding: '1.25rem',
+                color: 'var(--text2)',
+                lineHeight: 1.7,
+                fontSize: '0.9rem',
+              }}>
+                {selectedVideo.description}
+              </p>
+            )}
+          </div>
+        </div>
       )}
     </section>
   );

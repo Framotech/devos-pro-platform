@@ -46,6 +46,7 @@ export default function BlogSection() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
   const [categories, setCategories] = useState<string[]>(['All']);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -153,6 +154,15 @@ export default function BlogSection() {
               borderRadius: '12px', overflow: 'hidden',
               transition: 'all 0.3s ease', cursor: 'pointer',
             }}
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedPost(post)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedPost(post);
+                }
+              }}
               onMouseEnter={e => {
                 const el = e.currentTarget as HTMLElement;
                 el.style.borderColor = categoryColors[post.category] || 'var(--border-green)';
@@ -254,6 +264,69 @@ export default function BlogSection() {
               </div>
             </article>
           ))}
+        </div>
+      )}
+
+      {selectedPost && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 380,
+          background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '1.25rem',
+        }} onClick={() => setSelectedPost(null)}>
+          <article style={{
+            width: 'min(820px, 100%)',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            background: 'var(--bg2)',
+            border: '1px solid var(--border)',
+            borderRadius: '14px',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.55)',
+          }} onClick={e => e.stopPropagation()}>
+            {selectedPost.coverImage && (
+              <img src={selectedPost.coverImage} alt={selectedPost.title} style={{
+                width: '100%',
+                maxHeight: '360px',
+                objectFit: 'cover',
+                display: 'block',
+              }} />
+            )}
+            <div style={{ padding: '1.5rem' }}>
+              <div style={{
+                display: 'flex', justifyContent: 'space-between',
+                alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem',
+              }}>
+                <div>
+                  <div style={{
+                    fontFamily: 'var(--mono)', fontSize: '0.65rem',
+                    color: categoryColors[selectedPost.category] || 'var(--green)',
+                    textTransform: 'uppercase', letterSpacing: '0.1em',
+                    marginBottom: '0.75rem',
+                  }}>
+                    {selectedPost.category} · {selectedPost.readTime} min read
+                  </div>
+                  <h2 style={{ fontSize: 'clamp(1.4rem, 4vw, 2.25rem)', lineHeight: 1.1 }}>
+                    {selectedPost.title}
+                  </h2>
+                </div>
+                <button onClick={() => setSelectedPost(null)} style={{
+                  flex: '0 0 auto',
+                  width: '38px', height: '38px',
+                  background: 'var(--bg3)', border: '1px solid var(--border)',
+                  borderRadius: '8px', color: 'var(--text2)',
+                  cursor: 'pointer', fontSize: '1.1rem',
+                }}>✕</button>
+              </div>
+              <div style={{
+                whiteSpace: 'pre-wrap',
+                color: 'var(--text2)',
+                lineHeight: 1.8,
+                fontSize: '0.96rem',
+              }}>
+                {selectedPost.body || 'Article content is not available yet.'}
+              </div>
+            </div>
+          </article>
         </div>
       )}
     </section>

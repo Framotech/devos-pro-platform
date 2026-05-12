@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import AdminMediaUpload from '@/components/admin/AdminMediaUpload';
 
 interface Post {
   _id: string;
@@ -163,6 +164,14 @@ export default function BlogManager() {
                 <label style={labelStyle}>Cover Image URL</label>
                 <input style={inputStyle} value={form.coverImage} placeholder="https://..."
                   onChange={e => setForm({ ...form, coverImage: e.target.value })} />
+                <div style={{ marginTop: '0.6rem' }}>
+                  <AdminMediaUpload
+                    label="Upload Cover Image"
+                    namespace="blog"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onUploaded={url => setForm(current => ({ ...current, coverImage: url }))}
+                  />
+                </div>
               </div>
               <div>
                 <label style={labelStyle}>Body (Markdown supported)</label>

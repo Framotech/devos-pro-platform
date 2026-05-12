@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import AdminMediaUpload from '@/components/admin/AdminMediaUpload';
 
 
 interface StudioItem {
@@ -186,6 +187,14 @@ export default function StudioManager() {
                 <input style={inputStyle} value={form.coverImage}
                   placeholder="https://..."
                   onChange={e => setForm({ ...form, coverImage: e.target.value })} />
+                <div style={{ marginTop: '0.6rem' }}>
+                  <AdminMediaUpload
+                    label="Upload Cover Image"
+                    namespace="studio"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onUploaded={url => setForm(current => ({ ...current, coverImage: url }))}
+                  />
+                </div>
                 {form.coverImage && (
                   <img src={form.coverImage} alt="preview"
                     style={{ width: '100%', borderRadius: '8px', marginTop: '8px', border: '1px solid var(--border)' }}
@@ -198,6 +207,17 @@ export default function StudioManager() {
                 <textarea style={{ ...inputStyle, minHeight: '80px', resize: 'vertical', fontFamily: 'var(--mono)', fontSize: '0.8rem' }}
                   value={form.images} placeholder="https://image1.jpg&#10;https://image2.jpg"
                   onChange={e => setForm({ ...form, images: e.target.value })} />
+                <div style={{ marginTop: '0.6rem' }}>
+                  <AdminMediaUpload
+                    label="Upload Gallery Image"
+                    namespace="studio"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onUploaded={url => setForm(current => ({
+                      ...current,
+                      images: current.images ? `${current.images}\n${url}` : url,
+                    }))}
+                  />
+                </div>
               </div>
 
               {/* Links */}

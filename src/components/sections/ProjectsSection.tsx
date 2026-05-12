@@ -6,6 +6,7 @@ interface Project {
   _id: string;
   name: string;
   slug: string;
+  image: string;
   description: string;
   techStack: string[];
   status: string;
@@ -71,6 +72,11 @@ export default function ProjectsSection() {
   const getDate = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
+  };
+
+  const openProject = (project: Project) => {
+    const target = project.liveLink || project.githubLink;
+    if (target) window.open(target, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -152,7 +158,17 @@ export default function ProjectsSection() {
               border: '1px solid var(--border)',
               borderRadius: '12px', overflow: 'hidden',
               transition: 'all 0.3s ease',
+              cursor: project.liveLink || project.githubLink ? 'pointer' : 'default',
             }}
+              role={project.liveLink || project.githubLink ? 'link' : undefined}
+              tabIndex={project.liveLink || project.githubLink ? 0 : undefined}
+              onClick={() => openProject(project)}
+              onKeyDown={e => {
+                if ((e.key === 'Enter' || e.key === ' ') && (project.liveLink || project.githubLink)) {
+                  e.preventDefault();
+                  openProject(project);
+                }
+              }}
               onMouseEnter={e => {
                 const el = e.currentTarget as HTMLDivElement;
                 el.style.borderColor = 'var(--border-green)';
@@ -173,14 +189,22 @@ export default function ProjectsSection() {
                 display: 'flex', alignItems: 'center',
                 justifyContent: 'center', fontSize: '3rem',
               }}>
-                <div style={{
-                  position: 'absolute', inset: 0,
-                  backgroundImage: `
-                    linear-gradient(rgba(0,230,118,0.03) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0,230,118,0.03) 1px, transparent 1px)
-                  `,
-                  backgroundSize: '20px 20px',
-                }} />
+                {project.image ? (
+                  <img src={project.image} alt={project.name} style={{
+                    position: 'absolute', inset: 0,
+                    width: '100%', height: '100%', objectFit: 'cover',
+                    opacity: 0.72,
+                  }} />
+                ) : (
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    backgroundImage: `
+                      linear-gradient(rgba(0,230,118,0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0,230,118,0.03) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '20px 20px',
+                  }} />
+                )}
                 <div style={{
                   position: 'absolute', top: '12px', left: '12px',
                   fontFamily: 'var(--mono)', fontSize: '0.65rem',
@@ -269,7 +293,7 @@ export default function ProjectsSection() {
                   paddingTop: '1rem', borderTop: '1px solid var(--border)',
                 }}>
                   {project.githubLink && (
-                    <a href={project.githubLink} target="_blank" rel="noreferrer" style={{
+                    <a href={project.githubLink} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{
                       fontFamily: 'var(--mono)', fontSize: '0.72rem',
                       color: 'var(--green)', textDecoration: 'none',
                       fontWeight: 600, textTransform: 'uppercase',
@@ -279,7 +303,7 @@ export default function ProjectsSection() {
                     </a>
                   )}
                   {project.liveLink && (
-                    <a href={project.liveLink} target="_blank" rel="noreferrer" style={{
+                    <a href={project.liveLink} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{
                       fontFamily: 'var(--mono)', fontSize: '0.72rem',
                       color: 'var(--text2)', textDecoration: 'none',
                       textTransform: 'uppercase', letterSpacing: '0.05em',
